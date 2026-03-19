@@ -22,7 +22,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.0",
-    "pr-review-orchestrator": "file:../../AI-PROJECTS/pr-review-orchestrator",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

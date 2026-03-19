@@ -1,12 +1,19 @@
 name: PR Review Orchestrator
 
 on:
+  # Fires when you open a PR, push new commits to a PR, or reopen a PR
   pull_request:
     types: [opened, synchronize, reopened]
+    branches: [main, master, develop]
+
+  # Also fires on direct push to main (e.g. merge commit)
+  push:
+    branches: [main, master]
 
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   review:
@@ -27,11 +34,34 @@ jobs:
 
       - name: Run review
         env:
+          # ── Phase 2: Anthropic Claude (enterprise upgrade) ─────────────────
+          # When you add this secret, ALL 6 agents auto-upgrade to Claude Opus.
+          # Best quality, adaptive thinking. Get key: https://console.anthropic.com
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # ANTHROPIC_MODEL: claude-haiku-4-5   # cheaper option
+          # ── Phase 1: Free AI (first available key wins) ────────────────────
+          # Groq: free, Llama 3.3 70B, 14,400 req/day → https://console.groq.com
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Gemini: free, 1M tokens/day → https://aistudio.google.com/apikey
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # ── Alternative paid AI ────────────────────────────────────────────
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-5.4-mini
-          PR_REVIEW_PROVIDER: local
+          # ── Provider selection ─────────────────────────────────────────────
+          # multi-agent = 6 specialized AI agents (auto-picks best AI above)
+          # claude | groq | gemini | ollama | openai | local
+          PR_REVIEW_PROVIDER: multi-agent
+          # ── GitHub Issues (optional) ───────────────────────────────────────
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_MIN_SEVERITY: high
         run: |
-          git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+          # On pull_request: diff against the base branch (e.g. main)
+          # On push to main: diff against the previous commit
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+          else
+            git diff HEAD~1...HEAD > pr.diff
+          fi
           node ./dist/cli.js review --diff ./pr.diff --format github-pr > review.json
 
       - name: Post PR Review Comments
@@ -65,10 +95,24 @@ jobs:
               });
             }
 
-      # Uncomment this step later if you want to block the pipeline on high/critical findings.
+      # Uncomment to auto-create GitHub Issues for critical/high findings.
+      # - name: Create GitHub Issues for Severe Findings
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_REPOSITORY: ${{ github.repository }}
+      #     GITHUB_ISSUE_MIN_SEVERITY: high
+      #   run: |
+      #     node -e "
+      #       const { createGitHubIssues } = await import('./dist/reporters/github-issues.js');
+      #       const review = JSON.parse(require('fs').readFileSync('review.json','utf8'));
+      #       const issues = await createGitHubIssues(review, { prNumber: ${{ github.event.pull_request.number }} });
+      #       console.log('Created', issues.length, 'GitHub issue(s)');
+      #     "
+
+      # Uncomment to block the pipeline on high/critical findings.
       # - name: Block On Severe Findings
       #   run: |
-      #     node -e "const fs=require('fs'); const review=JSON.parse(fs.readFileSync('review.json','utf8')); if ((review.summary?.critical_count ?? 0) > 0 || (review.summary?.high_count ?? 0) > 0) process.exit(1);"
+      #     node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('review.json','utf8')); if ((r.summary?.critical_count??0)>0||(r.summary?.high_count??0)>0) process.exit(1);"
 
       - name: Upload result
         uses: actions/upload-artifact@v4
