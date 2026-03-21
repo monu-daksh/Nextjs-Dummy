@@ -1,6 +1,5 @@
 {
   "provider": "multi-agent",
-  "model": "gpt-5.4-mini",
   "ci": {
     "failOnSeverity": []
   },

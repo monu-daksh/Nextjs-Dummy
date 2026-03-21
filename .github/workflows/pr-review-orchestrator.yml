@@ -1,12 +1,12 @@
 name: PR Review Orchestrator
 
 on:
-  # Fires when you open a PR, push new commits to a PR, or reopen a PR
+  # Fires when a PR is opened, new commits are pushed to it, or new files are added
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main, master, develop]
 
-  # Also fires on direct push to main (e.g. merge commit)
+  # Also fires on direct push to main (e.g. a merge commit)
   push:
     branches: [main, master]
 
@@ -27,44 +27,38 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm install
+      - name: Install PR Review Orchestrator
+        run: npm install --no-save pr-review-orchestrator
 
-      - name: Build PR review tool
-        run: npm run build
-
-      - name: Run review
+      - name: Run AI review
         env:
-          # ── Phase 2: Anthropic Claude (enterprise upgrade) ─────────────────
-          # When you add this secret, ALL 6 agents auto-upgrade to Claude Opus.
-          # Best quality, adaptive thinking. Get key: https://console.anthropic.com
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # ANTHROPIC_MODEL: claude-haiku-4-5   # cheaper option
-          # ── Phase 1: Free AI (first available key wins) ────────────────────
-          # Groq: free, Llama 3.3 70B, 14,400 req/day → https://console.groq.com
+          # ── API keys — add these in GitHub: Settings → Secrets → Actions ────
+          # Only ONE key is needed. The agents auto-pick whichever is available.
+          #
+          # FREE  → GROQ_API_KEY   (Groq, Llama 3.3 70B) https://console.groq.com
+          # FREE  → GEMINI_API_KEY (Gemini Flash)         https://aistudio.google.com/apikey
+          # PAID  → ANTHROPIC_API_KEY (Claude, upgrade)   https://console.anthropic.com
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # Gemini: free, 1M tokens/day → https://aistudio.google.com/apikey
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # ── Alternative paid AI ────────────────────────────────────────────
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # ── Provider selection ─────────────────────────────────────────────
-          # multi-agent = 6 specialized AI agents (auto-picks best AI above)
-          # claude | groq | gemini | ollama | openai | local
-          PR_REVIEW_PROVIDER: multi-agent
-          # ── GitHub Issues (optional) ───────────────────────────────────────
+          # ── Provider + model — read from pr-review-orchestrator.config.json ──
+          # Override here only if you need a different value in CI:
+          # PR_REVIEW_PROVIDER: groq
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_ISSUE_MIN_SEVERITY: high
         run: |
-          # On pull_request: diff against the base branch (e.g. main)
-          # On push to main: diff against the previous commit
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git diff origin/${{ github.base_ref }}...HEAD > pr.diff
           else
             git diff HEAD~1...HEAD > pr.diff
           fi
-          node ./dist/cli.js review --diff ./pr.diff --format github-pr > review.json
+          npx pr-review-orchestrator review --diff ./pr.diff --format github-pr > review.json
 
       - name: Post PR Review Comments
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -79,11 +73,11 @@ jobs:
                 pull_number: context.payload.pull_request.number,
                 commit_id: context.payload.pull_request.head.sha,
                 event: 'COMMENT',
-                comments: comments.map((comment) => ({
-                  path: comment.path,
-                  line: comment.line,
+                comments: comments.map((c) => ({
+                  path: c.path,
+                  line: c.line,
                   side: 'RIGHT',
-                  body: comment.body
+                  body: c.body
                 }))
               });
             } else {
@@ -91,30 +85,16 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: 'PR Review Orchestrator: no high-confidence findings in this run.'
+                body: 'PR Review Orchestrator: no high-confidence findings in this diff.'
               });
             }
 
-      # Uncomment to auto-create GitHub Issues for critical/high findings.
-      # - name: Create GitHub Issues for Severe Findings
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     GITHUB_REPOSITORY: ${{ github.repository }}
-      #     GITHUB_ISSUE_MIN_SEVERITY: high
+      # Uncomment to block the pipeline on critical/high findings:
+      # - name: Block on critical findings
       #   run: |
-      #     node -e "
-      #       const { createGitHubIssues } = await import('./dist/reporters/github-issues.js');
-      #       const review = JSON.parse(require('fs').readFileSync('review.json','utf8'));
-      #       const issues = await createGitHubIssues(review, { prNumber: ${{ github.event.pull_request.number }} });
-      #       console.log('Created', issues.length, 'GitHub issue(s)');
-      #     "
+      #     node -e "const r=JSON.parse(require('fs').readFileSync('review.json','utf8')); if((r.summary?.critical_count??0)>0||(r.summary?.high_count??0)>0)process.exit(1);"
 
-      # Uncomment to block the pipeline on high/critical findings.
-      # - name: Block On Severe Findings
-      #   run: |
-      #     node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('review.json','utf8')); if ((r.summary?.critical_count??0)>0||(r.summary?.high_count??0)>0) process.exit(1);"
-
-      - name: Upload result
+      - name: Upload review artifact
         uses: actions/upload-artifact@v4
         with:
           name: pr-review-json
