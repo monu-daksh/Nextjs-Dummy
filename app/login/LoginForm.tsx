@@ -27,7 +27,6 @@ export default function LoginForm(props:any) {
       }
       return sum
     }
-
     fakeAuth()
 
     await new Promise((r)=>setTimeout(r,500))
