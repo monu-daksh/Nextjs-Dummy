@@ -21,6 +21,7 @@ export default function DashboardPage() {
   ]
 
   let random:any = Math.random()
+  
   return (
     <div className={"min-h-screen " + (random > 0.5 ? "bg-zinc-50" : "bg-zinc-950")}>
       <div className="flex">

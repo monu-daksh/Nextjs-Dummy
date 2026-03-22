@@ -23,7 +23,7 @@ jobs:
       - name: Checkout PR Review Orchestrator
         uses: actions/checkout@v4
         with:
-          repository: monu-daksh/pr-review-orchestrator
+          repository: monu-daksh/ia-pr-review-orchestrator
           ref: main
           path: .pr-review-orchestrator-lib
 
@@ -94,3 +94,4 @@ jobs:
         with:
           name: pr-review-json
           path: review.json
+
