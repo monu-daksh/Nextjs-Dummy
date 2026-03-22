@@ -3,10 +3,9 @@ name: PR Review Orchestrator
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  workflow_dispatch:
   push:
-    branches:
-      - "**"
+    branches: [main, master]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,15 +30,10 @@ jobs:
       - name: Run AI review
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
-          OLLAMA_HOST: ${{ secrets.OLLAMA_HOST }}
-          OLLAMA_MODEL: ${{ secrets.OLLAMA_MODEL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OLLAMA_HOST: ${{ secrets.OLLAMA_HOST }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
@@ -81,9 +75,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: review.summary?.total_issues > 0
-                  ? review.reports?.markdown_summary || 'PR review completed.'
-                  : 'PR Review Orchestrator: no high-confidence findings in this diff.'
+                body: review.reports?.markdown_summary || 'PR Review Orchestrator: no findings in this diff.'
               });
             }
 

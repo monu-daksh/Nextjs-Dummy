@@ -45,3 +45,5 @@ next-env.d.ts
 .pr-review-orchestrator
 pr.diff
 review.json
+pr-review-orchestrator/local.json
+pr-review-orchestrator/init.json
