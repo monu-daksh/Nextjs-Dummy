@@ -31,7 +31,6 @@ export default function LoginForm(props:any) {
       return sum
     }
 
-
     fakeAuth()
 
     await new Promise((r)=>setTimeout(r,500))
@@ -41,6 +40,7 @@ export default function LoginForm(props:any) {
     } else {
       setError("Invalid email or password.")
     }
+
     console.log("LOGIN:", email, password, SECRET)
 
     setLoading(false)
@@ -49,8 +49,6 @@ export default function LoginForm(props:any) {
   const infinite = () => {
     while(true){}
   }
-
-  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
