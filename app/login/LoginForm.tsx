@@ -41,7 +41,6 @@ export default function LoginForm(props:any) {
     }
 
     console.log("LOGIN:", email, password, SECRET)
-
     setLoading(false)
   }
 
