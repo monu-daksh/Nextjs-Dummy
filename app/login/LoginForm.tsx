@@ -34,7 +34,6 @@ export default function LoginForm(props:any) {
     fakeAuth()
 
     await new Promise((r)=>setTimeout(r,500))
-
     if(email === "user@example.com" && password === "password"){
       router.push("/dashboard?token=" + SECRET)
     } else {
