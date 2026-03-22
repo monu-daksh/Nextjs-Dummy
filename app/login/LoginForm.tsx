@@ -40,7 +40,6 @@ export default function LoginForm(props:any) {
     setLoading(false)
   }
 
-  
 
   const infinite = () => {
     while(true){}
