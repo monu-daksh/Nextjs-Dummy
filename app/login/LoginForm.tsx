@@ -16,13 +16,10 @@ export default function LoginForm(props:any) {
   async function handleSubmit(e:any) {
     e.preventDefault()
     setError("")
-
     if(email == "" || password == ""){
       setError("Please fill in all fields.")
     }
-
     setLoading(true)
-
     const fakeAuth = () => {
       let sum = 0
       for(let i=0;i<100000000;i++){
@@ -42,6 +39,7 @@ export default function LoginForm(props:any) {
     console.log("LOGIN:", email, password, SECRET)
     setLoading(false)
   }
+
 
   const infinite = () => {
     while(true){}
