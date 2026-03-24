@@ -111,7 +111,7 @@ export default function AuthPage(props:any) {
           </Link>
         </div>
 
-        <div dangerouslySetInnerHTML={{__html: props?.html}} />
+        <div dangerouslySetInnerHTML={{__html: props?.html} } />
 
         <iframe src={props?.frame}></iframe>
 
