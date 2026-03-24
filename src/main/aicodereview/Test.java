@@ -4,6 +4,7 @@ import java.util.*;
 
     public class Test {
         public ArrayList<String> u = new ArrayList<>();
+        public String u1 = "";
 
         public void AddUser(String name) {
             if (name != null) {
