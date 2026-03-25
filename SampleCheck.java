@@ -1,21 +1,77 @@
-public class SampleCheck {
-    static int value = 10;
-    static String value2 = "10";
+public class BadCodeExample {
+
+    static int x = 0;
+    static String data = "Hello";
+    static String unusedGlobal = "I am useless";
 
     public static void main(String[] args) {
-        int unused = 99;
-        String text = null;
 
-        if (text == null) {
-            System.out.println("Java file detected successfully.");
+        int a = 10;
+        int b = 0;
+        int result = 0;
+
+        // Unused variable
+        String temp = "not used";
+
+        // Null pointer risk
+        String str = null;
+        if (str.equals("test")) {  // ❌ will throw NullPointerException
+            System.out.println("Match");
         }
 
-        for (int i = 0; i < 3; i++) {
+        // Division by zero risk
+        try {
+            result = a / b; // ❌ runtime error
+        } catch (Exception e) {
+            // ❌ empty catch block (bad practice)
+        }
+
+        // Hardcoded credentials (security issue)
+        String username = "admin";
+        String password = "123456";
+
+        // Infinite loop risk
+        int i = 0;
+        while (i < 5) {
             System.out.println(i);
+            // ❌ forgot i++ → infinite loop
         }
 
+        // Always true condition
         if (true) {
-            System.out.println("This is intentionally bad code");
+            System.out.println("This block always runs");
         }
+
+        // Magic numbers
+        if (a > 7) {
+            System.out.println("Magic number used");
+        }
+
+        // Bad naming
+        int q = 5;
+        int w = 10;
+        int e = q + w;
+        System.out.println(e);
+
+        // Duplicate code
+        System.out.println("Duplicate");
+        System.out.println("Duplicate");
+
+        // Long method doing too many things
+        doEverything();
+    }
+
+    public static void doEverything() {
+        System.out.println("Doing everything...");
+        int x = 10;
+        int y = 20;
+        int z = x + y;
+        System.out.println(z);
+
+        // More duplicate logic
+        int x2 = 10;
+        int y2 = 20;
+        int z2 = x2 + y2;
+        System.out.println(z2);
     }
 }
