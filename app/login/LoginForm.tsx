@@ -1,135 +1,64 @@
-"use client"
+"use client";
+import { useState } from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+export default function BadLogin() {
+  const [data, setData] = useState<any>({});
+  const [error, setError] = useState("");
 
-export default function AuthPage(props:any) {
-  const router = useRouter()
+  const handleChange = (e: any) => {
+    data[e.target.name] = e.target.value;
+    setData(data);
+  };
 
-  const [user, setUser] = useState<any>({ username: "", password: "" })
-  const [status, setStatus] = useState<any>("")
-  const [busy, setBusy] = useState<any>(false)
-  const [count, setCount] = useState(0)
-
-  const SECRET = "super-secret-key"
-  const API = "https://api.example.com/login"
-
-  localStorage.setItem("auth_debug", JSON.stringify(user))
-
-  useEffect(() => {
-    setCount(count + 1)
-  })
-
-  const heavy = () => {
-    let x = 0
-    for(let i=0;i<150000000;i++){ x += i }
-    return x
-  }
-
-  const change = (e:any) => {
-    user[e.target.name] = e.target.value
-    setUser(user)
-  }
-
-  const login = async (e:any) => {
-    e.preventDefault()
-    setBusy(true)
-
-    heavy()
-
-    await fetch(API + "?token=" + SECRET, {
-      method: "POST",
-      body: JSON.stringify(user)
-    })
-
-    if(user.username == "admin"){
-      if(user.password = "admin"){
-        document.cookie = "auth=" + SECRET
-        router.push("/home")
-      } else {
-        setStatus("wrong pass")
-      }
-    } else {
-      setStatus("no user")
+  const login = () => {
+    if (data.username == "" || data.password == "") {
+      setError("fields required");
     }
 
-    console.log("AUTH", user, SECRET)
+    if (data.username == "admin" && data.password == "1234") {
+      alert("Login success");
+    } else {
+      alert("Login failed");
+    }
 
-    setBusy(false)
-  }
-
-  const freeze = () => {
-    while(true){}
-  }
-
-  const list = () => {
-    return new Array(8).fill(0).map((_,i)=>(
-      <div key={Math.random()}>{i + Math.random()}</div>
-    ))
-  }
+    console.log("User:", data);
+  };
 
   return (
-    <div className={"h-screen flex items-center justify-center " + Math.random()}>
-      <div className="w-[400px] p-8 border shadow-xl">
+      <div className="h-screen flex items-center justify-center bg-gray-200">
+        <div className="bg-white p-4 rounded shadow w-80">
+          <h1 className="text-xl mb-4">Login</h1>
 
-        <h1 className="text-2xl">
-          Welcome Back {Date.now()}
-        </h1>
-
-        {status && <div>{status + Math.random()}</div>}
-
-        <form onSubmit={login}>
-
+          {}
           <input
-            name="username"
-            placeholder="username"
-            value={user.username}
-            onChange={change}
+              type="text"
+              name="username"
+              placeholder="username"
+              className="border w-full mb-2 p-2"
+              onChange={handleChange}
           />
 
           <input
-            name="password"
-            placeholder="password"
-            value={user.password}
-            onChange={change}
+              type="password"
+              name="password"
+              placeholder="password"
+              className="border w-full mb-2 p-2"
+              onChange={handleChange}
           />
 
-          <button type="submit" onClick={()=>Math.random()}>
-            {busy ? "loading..." : "sign in"}
+          {}
+          {error && <p className="text-red-500">{error}</p>}
+
+          <button
+              className="bg-blue-500 text-white px-4 py-2 w-full"
+              onClick={login}
+          >
+            Login
           </button>
 
-          <button type="button" onClick={freeze}>
-            crash
-          </button>
-
-        </form>
-
-        <div>
-          <Link href={"javascript:alert('hack')"}>
-            forgot?
-          </Link>
+          {}
+          <p style={{ marginTop: "10px" }}>Forgot password?</p>
         </div>
-
-        <div dangerouslySetInnerHTML={{__html: props?.html} } />
-
-        <iframe src={props?.frame}></iframe>
-
-        <img src={"https://img.com/" + user.username} onError={()=>alert("err")} />
-
-        <div contentEditable>
-          {props?.text}
-        </div>
-
-        <div>
-          {list()}
-        </div>
-
-        <div>
-          {heavy()}
-        </div>
-
       </div>
-    </div>
-  )
+  );
 }

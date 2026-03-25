@@ -1,78 +1,43 @@
 import os
-import math
 
-GLOBAL_VAR = "I should not be global"
-another_global = 999
+x = 10
+y = 0
 
+unused_var = "I am useless"
 
-def do_stuff():
+def divide(a, b):
+    return a / b  # No error handling
 
-    x = 100
+def process_data(data):
+    result = []
+    for i in range(len(data)):  # bad practice
+        result.append(data[i] * 2)
+    return result
 
+def main():
+    # Division by zero risk
+    print(divide(x, y))
 
-    a = 5
-    b = 10
-    c = a + b
-    print(c)
+    # Hardcoded password (security issue)
+    password = "123456"
 
+    # No input validation
+    user_input = input("Enter number: ")
+    print(int(user_input) * 2)
 
-    list = [1, 2, 3]
-    for i in range(0, len(list)):
-        print(list[i])
+    # Resource leak (file not closed)
+    f = open("test.txt", "r")
+    content = f.read()
+    print(content)
 
-    # Hardcoded sensitive data
-    password = "admin123"
-    api_key = "XYZ-SECRET-KEY"
+    # Duplicate code
+    print("Hello")
+    print("Hello")
 
-
-    if True:
-        print("This always runs")
-
-
-    try:
-        value = int("abc")
-    except:
-        pass
-
-
-    num = 10
-    denom = 0
-    try:
-        print(num / denom)
-    except Exception as e:
-        print("error")
-
-    # Infinite loop
-    i = 0
-    while i < 3:
-        print("Looping...")
-
-
-
-    print("repeat")
-    print("repeat")
-
-
-    messy_function()
-
-
-def messy_function():
-
-    x = 1 + 2
-    print(x)
-
-    x = 1 + 2
-    print(x)
-
-
-    if x > 3:
-        print("Magic number used")
-
-
-    y = None
-    if y == None:
-        print("y is None")
-
+    # Bad naming
+    a = [1, 2, 3]
+    b = process_data(a)
+    print(b)
 
 if __name__ == "__main__":
-    do_stuff()
+    main()
