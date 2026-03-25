@@ -6,7 +6,7 @@ another_global = 999
 
 
 def do_stuff():
-    
+
     x = 100
 
 

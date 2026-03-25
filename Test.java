@@ -69,7 +69,7 @@ public class Test {
         int z = x + y;
         System.out.println(z);
 
-
+        // More duplicate logic
         int x2 = 10;
         int y2 = 20;
         int z2 = x2 + y2;
