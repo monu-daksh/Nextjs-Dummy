@@ -1,77 +1,96 @@
-public class BadCodeExample {
+public class WorseCodeExample {
 
-    static int x = 0;
-    static String data = "Hello";
-    static String unusedGlobal = "I am useless";
+    // Global mutable state (bad practice)
+    public static int counter = 0;
 
     public static void main(String[] args) {
 
-        int a = 10;
-        int b = 0;
-        int result = 0;
-
-        // Unused variable
-        String temp = "not used";
-
-        // Null pointer risk
-        String str = null;
-        if (str.equals("test")) {  // ❌ will throw NullPointerException
-            System.out.println("Match");
-        }
-
-        // Division by zero risk
-        try {
-            result = a / b; // ❌ runtime error
-        } catch (Exception e) {
-            // ❌ empty catch block (bad practice)
-        }
-
-        // Hardcoded credentials (security issue)
-        String username = "admin";
-        String password = "123456";
-
-        // Infinite loop risk
-        int i = 0;
-        while (i < 5) {
-            System.out.println(i);
-            // ❌ forgot i++ → infinite loop
-        }
-
-        // Always true condition
-        if (true) {
-            System.out.println("This block always runs");
-        }
-
-        // Magic numbers
-        if (a > 7) {
-            System.out.println("Magic number used");
-        }
-
-        // Bad naming
-        int q = 5;
-        int w = 10;
-        int e = q + w;
-        System.out.println(e);
-
-        // Duplicate code
-        System.out.println("Duplicate");
-        System.out.println("Duplicate");
-
-        // Long method doing too many things
-        doEverything();
+        // Too many responsibilities in one method
+        login();
+        processData();
+        sendEmail();
+        calculateSomething();
     }
 
-    public static void doEverything() {
-        System.out.println("Doing everything...");
-        int x = 10;
-        int y = 20;
-        int z = x + y;
-        System.out.println(z);
+    public static void login() {
+        // Hardcoded credentials
+        String user = "root";
+        String pass = "root123";
 
-        // More duplicate logic
-        int x2 = 10;
-        int y2 = 20;
-        int z2 = x2 + y2;
-        System.out.println(z2);
+        if (user == "root" && pass == "root123") { // ❌ wrong string comparison
+            System.out.println("Login success");
+        }
+    }
+
+    public static void processData() {
+
+        int[] arr = {1, 2, 3};
+
+        // Array index out of bounds risk
+        for (int i = 0; i <= arr.length; i++) { // ❌ should be <
+            System.out.println(arr[i]);
+        }
+
+        // Dead code
+        if (false) {
+            System.out.println("Never runs");
+        }
+
+        // Nested loops (bad readability)
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                for (int k = 0; k < 3; k++) {
+                    System.out.println(i + "" + j + "" + k);
+                }
+            }
+        }
+    }
+
+    public static void sendEmail() {
+
+        // Empty method pretending to do something
+        try {
+            System.out.println("Sending email...");
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            // Swallowing exception
+        }
+
+        // No actual email logic
+    }
+
+    public static void calculateSomething() {
+
+        // Magic numbers everywhere
+        int result = 42 * 13 / 7 + 99;
+
+        // Useless condition
+        if (result == result) {
+            System.out.println("Always true");
+        }
+
+        // Repeated logic instead of function reuse
+        int a = 5 + 10;
+        int b = 5 + 10;
+        int c = 5 + 10;
+
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(c);
+
+        // Poor exception handling
+        try {
+            int x = Integer.parseInt("abc"); // ❌ will fail
+        } catch (Exception e) {
+            System.out.println("Error"); // ❌ no useful info
+        }
+
+        // Unnecessary object creation
+        String s1 = new String("hello");
+        String s2 = new String("hello");
+
+        if (s1 == s2) { // ❌ reference comparison
+            System.out.println("Same");
+        }
     }
 }
